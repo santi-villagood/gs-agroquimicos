@@ -54,12 +54,34 @@
 
   function validarConfig(c) {
     const mal = [];
-    if (!c.whatsapp) mal.push("whatsapp");
-    if (!Array.isArray(c.tipos_aplicacion) || c.tipos_aplicacion.length === 0) mal.push("tipos_aplicacion");
-    if (!Array.isArray(c.localidades) || c.localidades.length === 0) mal.push("localidades");
+    if (!c || typeof c !== "object" || Array.isArray(c)) {
+      throw new Error("El config.json debe contener un objeto JSON válido.");
+    }
+
+    // El WhatsApp se revisa aparte (en renderizar): si está mal, se esconden los botones
+    // de contacto con un aviso en la consola, pero el resto del sitio sigue andando.
+
+    if (!Array.isArray(c.tipos_aplicacion) || c.tipos_aplicacion.length === 0 ||
+        !c.tipos_aplicacion.every((t) => t && typeof t.id === "string" && t.id.trim() &&
+          typeof t.nombre === "string" && t.nombre.trim() &&
+          Number.isFinite(t.precio_por_hectarea) && t.precio_por_hectarea >= 0)) {
+      mal.push("tipos_aplicacion");
+    }
+
+    if (!Array.isArray(c.localidades) || c.localidades.length === 0 ||
+        !c.localidades.every((loc) => loc && typeof loc.nombre === "string" && loc.nombre.trim() &&
+          Number.isFinite(loc.distancia_km) && loc.distancia_km >= 0)) {
+      mal.push("localidades");
+    }
+
     ["limite_hectareas", "limite_distancia_km", "recargo_traslado"].forEach((clave) => {
-      if (typeof c[clave] !== "number") mal.push(clave);
+      if (!Number.isFinite(c[clave]) || c[clave] < 0) mal.push(clave);
     });
+
+    if (c.maximo_hectareas !== undefined && (!Number.isFinite(c.maximo_hectareas) || c.maximo_hectareas <= 0)) {
+      mal.push("maximo_hectareas");
+    }
+
     if (mal.length > 0) {
       throw new Error("En config.json falta o está mal: " + mal.join(", ") + ".");
     }
@@ -72,8 +94,7 @@
   }
 
   /* ---------- 2. Completar la página con los datos del config ---------- */
-  function linkWhatsapp(c, mensaje) {
-    const numero = String(c.whatsapp).replace(/\D/g, "");
+  function linkWhatsapp(numero, mensaje) {
     return "https://wa.me/" + numero + "?text=" + encodeURIComponent(mensaje);
   }
 
@@ -100,6 +121,7 @@
     ponerTexto("titulo-galeria", ga.titulo);
     ponerTexto("subtitulo-galeria", ga.subtitulo);
     renderizarGaleria(ga.fotos || []);
+    controlarVisibilidadGaleria(ga);
 
     const ca = c.calculadora || {};
     ponerTexto("titulo-calculadora", ca.titulo);
@@ -111,9 +133,16 @@
     ponerTexto("texto-contacto", co.texto);
     ponerTexto("texto-zona", co.zona);
 
-    const url = linkWhatsapp(c, co.mensaje_directo || "Hola, quería hacer una consulta.");
-    $("boton-whatsapp").href = url;
-    $("pie-whatsapp").href = url;
+    const numeroWsp = window.Calculadora.normalizarWhatsapp(c.whatsapp);
+    if (numeroWsp) {
+      const url = linkWhatsapp(numeroWsp, co.mensaje_directo || "Hola, quería hacer una consulta.");
+      $("boton-whatsapp").href = url;
+      $("pie-whatsapp").href = url;
+    } else {
+      console.warn("config.json: el número de WhatsApp no es válido (formato 549 + área + número, sin espacios). Se esconden los botones de WhatsApp.");
+      $("boton-whatsapp").hidden = true;
+      $("pie-whatsapp").hidden = true;
+    }
     if (co.boton) {
       $("boton-whatsapp").lastChild.textContent = " " + co.boton;
     }
@@ -164,6 +193,29 @@
       img.src = f.src;
       figura.append(img);
       contenedor.append(figura);
+    });
+  }
+
+  /* Esconde la sección (y su link del menú) si: config.galeria.mostrar es false,
+     no hay fotos en la lista, o NINGUNA de las fotos carga (todavía no las subiste). */
+  function controlarVisibilidadGaleria(ga) {
+    const seccion = $("galeria");
+    const enlace = $("enlace-galeria");
+    const fotos = Array.isArray(ga.fotos) ? ga.fotos : [];
+
+    const ocultar = () => {
+      if (seccion) seccion.hidden = true;
+      if (enlace && enlace.parentElement) enlace.parentElement.hidden = true;
+    };
+
+    if (ga.mostrar === false || fotos.length === 0) { ocultar(); return; }
+
+    // Pruebo cada foto aparte (las del <img> son "lazy" y recién cargan al llegar a la sección)
+    let fallidas = 0;
+    fotos.forEach((f) => {
+      const prueba = new Image();
+      prueba.addEventListener("error", () => { fallidas += 1; if (fallidas === fotos.length) ocultar(); });
+      prueba.src = f.src;
     });
   }
 
