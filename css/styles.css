@@ -435,3 +435,85 @@ p { margin: 0 0 1em; }
     scroll-behavior: auto !important;
   }
 }
+/* ==========================================================
+   DRON QUE ACOMPAÑA AL SCROLL (grande arriba, chiquito al bajar)
+   Lo que se puede ajustar está arriba de todo, en .dron
+   ========================================================== */
+.dron {
+  /* --- Esto podés tocarlo --- */
+  --w: min(86vw, 420px);                  /* ancho del dron al principio */
+  --escala-final: 0.34;                   /* cuánto se achica (0.34 = a un tercio) */
+  --cy0: 80svh;                           /* altura del centro del dron al principio (0 = arriba, 100svh = abajo) */
+  --derecha: clamp(0.5rem, 3vw, 2rem);    /* dónde se estaciona: distancia al borde derecho */
+  --abajo: 1rem;                          /* ...y al borde de abajo */
+
+  /* --- Cálculos internos (no tocar) --- */
+  --p: 0;                                 /* progreso: 0 = grande arriba, 1 = chiquito estacionado (lo mueve el JS) */
+  --x0: calc(var(--derecha) - (100vw - var(--w)) / 2);
+  --y0: calc(-1 * (100svh - var(--cy0) - var(--w) * 0.284 - var(--abajo)));
+
+  position: fixed; right: var(--derecha); bottom: var(--abajo);
+  width: var(--w); z-index: 30; pointer-events: none;
+  transform-origin: 100% 100%;
+  transform:
+    translate(calc(var(--x0) * (1 - var(--p))), calc(var(--y0) * (1 - var(--p))))
+    scale(calc(1 - (1 - var(--escala-final)) * var(--p)));
+  will-change: transform;
+}
+
+@media (min-width: 900px) {
+  .dron { --w: min(40vw, 540px); --cy0: 56svh; --x0: 0px; }
+}
+
+.dron__flota { position: relative; animation: flotar 3.4s ease-in-out infinite; }
+.dron__img {
+  display: block; width: 100%; height: auto;
+  filter: drop-shadow(0 18px 24px rgb(0 0 0 / 0.35)) drop-shadow(0 0 18px rgb(255 255 255 / 0.22));
+}
+
+@keyframes flotar {
+  0%, 100% { transform: translateY(0) rotate(-0.6deg); }
+  50%      { transform: translateY(calc(var(--w) * -0.025)) rotate(0.6deg); }
+}
+
+/* ---------- Chorritos ---------- */
+/* Posición de cada pico sobre la foto (en % del ancho y del alto de la imagen) */
+.pico { position: absolute; left: var(--x); top: var(--y); width: 0; height: 0; }
+.pico--izq { --x: 33%; --y: 57%; }
+.pico--der { --x: 74%; --y: 57%; }
+
+/* Neblina en forma de cono */
+.pico__niebla {
+  position: absolute; top: 0; left: calc(var(--w) * -0.07);
+  width: calc(var(--w) * 0.14); height: calc(var(--w) * 0.3);
+  background: linear-gradient(to bottom, rgb(170 225 255 / 0.7), rgb(170 225 255 / 0));
+  clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+  filter: blur(calc(var(--w) * 0.006));
+  transform-origin: 50% 0;
+  animation: niebla 0.5s ease-in-out infinite alternate;
+}
+@keyframes niebla {
+  from { transform: scaleY(0.92) scaleX(0.95); opacity: 0.6; }
+  to   { transform: scaleY(1.08) scaleX(1.05); opacity: 0.9; }
+}
+
+/* Gotitas (las crea main.js; cada una trae su duración, retraso y desvío) */
+.gota {
+  position: absolute; top: 0; left: 0; opacity: 0;
+  width: calc(var(--w) * 0.013); height: calc(var(--w) * 0.02);
+  margin-left: calc(var(--w) * -0.0065);
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  background: radial-gradient(circle at 35% 30%, #fff, #9bd6ff 55%, #4aa8e8);
+  animation: caer var(--t, 0.9s) linear infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes caer {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.5); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(var(--dx, 0) * var(--w) * 0.05), calc(var(--w) * 0.3)) scale(var(--escala, 1)); }
+}
+
+/* Si pidió reducir movimiento: el dron queda quieto, chiquito y sin chorros */
+@media (prefers-reduced-motion: reduce) {
+  .pico { display: none; }
+}
