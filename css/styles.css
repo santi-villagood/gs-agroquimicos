@@ -517,3 +517,42 @@ p { margin: 0 0 1em; }
 @media (prefers-reduced-motion: reduce) {
   .pico { display: none; }
 }
+/* ==========================================================
+   DRON EN CELULAR (pantallas de menos de 900px)
+   Arranca CHIQUITO arriba, patrullando de izquierda a derecha,
+   y al scrollear baja a la esquina de abajo a la derecha.
+   ========================================================== */
+@media (max-width: 899px) {
+
+  /* Dejamos un hueco arriba del hero para que el dron vuele sin pisar el texto */
+  .hero { padding-top: calc(var(--alto-header) + 7.5rem); padding-bottom: 3rem; }
+
+  .dron {
+    /* --- Esto podés tocarlo --- */
+    --w: clamp(140px, 26vw, 200px);                          /* tamaño del dron al principio */
+    --escala-final: 0.75;                                    /* tamaño al estacionarse (0.75 = tres cuartos) */
+    --cy0: calc(var(--alto-header) + 3.5rem);                /* altura a la que vuela arriba (desde el borde de la pantalla) */
+    --vaiven: calc((100vw - var(--w)) / 2 - 0.75rem);        /* cuánto se va hacia cada lado */
+
+    /* --- Cálculo interno: al bajar, el vaivén se va apagando --- */
+    --amp: calc(var(--vaiven) * (1 - var(--p)));
+  }
+
+  /* Flotar (ya tenía) + ir de un lado al otro + inclinarse al avanzar */
+  .dron__flota {
+    animation:
+      flotar 3.4s ease-in-out infinite,
+      patrulla 7s ease-in-out infinite,
+      inclinar 7s ease-in-out infinite;
+  }
+}
+
+@keyframes patrulla {
+  0%, 100% { translate: calc(var(--amp) * -1) 0; }   /* extremo izquierdo */
+  50%      { translate: var(--amp) 0; }              /* extremo derecho */
+}
+@keyframes inclinar {
+  0%, 50%, 100% { rotate: 0deg; }
+  25%           { rotate: 5deg; }    /* va hacia la derecha: se inclina para ese lado */
+  75%           { rotate: -5deg; }   /* vuelve hacia la izquierda: se inclina para el otro */
+}
