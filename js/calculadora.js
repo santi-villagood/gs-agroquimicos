@@ -14,6 +14,17 @@
 
   const $ = (id) => document.getElementById(id);
 
+  const WHATSAPP_EJEMPLO = "5493510000000";   // número de ejemplo del config original: no se considera válido
+  const MAXIMO_HECTAREAS_POR_DEFECTO = 100000;
+
+  /* ---------- WhatsApp: UNA sola validación para todo el sitio ----------
+     Devuelve solo los dígitos si el número sirve (10 a 15 dígitos), o null si no. */
+  function normalizarWhatsapp(valor) {
+    const digitos = String(valor == null ? "" : valor).replace(/\D/g, "");
+    if (!/^\d{10,15}$/.test(digitos) || digitos === WHATSAPP_EJEMPLO) return null;
+    return digitos;
+  }
+
   /* ---------- Formato ---------- */
   function dinero(valor) {
     try {
@@ -32,39 +43,89 @@
      Recargo SOLO si hectareas < limite_hectareas Y distancia > limite_distancia_km */
   function calcularPresupuesto(cfg, datos) {
     const tipo = cfg.tipos_aplicacion.find((t) => t.id === datos.tipoId);
-    const localidad = cfg.localidades[datos.indiceLocalidad];
+    const indiceLocalidad = Number(datos.indiceLocalidad);
+    const localidad = Number.isInteger(indiceLocalidad) ? cfg.localidades[indiceLocalidad] : null;
+
     if (!tipo || !localidad) {
       throw new Error("Falta el tipo de aplicación o la localidad.");
     }
 
-    const hectareas = datos.hectareas;
-    const base = Math.round(hectareas * tipo.precio_por_hectarea * 100) / 100;
+    const hectareas = Number(datos.hectareas);
+    const precioHa = Number(tipo.precio_por_hectarea);
+    const distanciaKm = Number(localidad.distancia_km);
+    const limiteHectareas = Number(cfg.limite_hectareas);
+    const limiteDistanciaKm = Number(cfg.limite_distancia_km);
+    const recargoConfigurado = Number(cfg.recargo_traslado);
 
-    const esChico = hectareas < cfg.limite_hectareas;
-    const esLejos = localidad.distancia_km > cfg.limite_distancia_km;
+    if (!Number.isFinite(hectareas) || hectareas <= 0 ||
+        !Number.isFinite(precioHa) || precioHa < 0 ||
+        !Number.isFinite(distanciaKm) || distanciaKm < 0 ||
+        !Number.isFinite(limiteHectareas) || limiteHectareas < 0 ||
+        !Number.isFinite(limiteDistanciaKm) || limiteDistanciaKm < 0 ||
+        !Number.isFinite(recargoConfigurado) || recargoConfigurado < 0) {
+      throw new Error("Hay datos numéricos inválidos en el presupuesto o en config.json.");
+    }
+
+    const base = Math.round(hectareas * precioHa * 100) / 100;
+    if (!Number.isFinite(base)) {
+      throw new Error("El importe calculado es demasiado grande. Revisá las hectáreas ingresadas.");
+    }
+
+    const esChico = hectareas < limiteHectareas;
+    const esLejos = distanciaKm > limiteDistanciaKm;
     const aplicaRecargo = esChico && esLejos;
-    const recargo = aplicaRecargo ? cfg.recargo_traslado : 0;
+    const recargo = aplicaRecargo ? recargoConfigurado : 0;
+    const total = base + recargo;
+
+    if (!Number.isFinite(total)) {
+      throw new Error("No se pudo calcular un total válido. Revisá los datos ingresados.");
+    }
 
     return {
       tipo,
       localidad,
       hectareas,
-      precioHa: tipo.precio_por_hectarea,
+      precioHa,
       base,
       recargo,
       aplicaRecargo,
       esChico,
       esLejos,
-      total: base + recargo
+      total
     };
   }
 
   /* ---------- Validación ---------- */
+  /* Acepta: 120 · 85,5 · 85.5 · 1.500 (miles con punto) · 1.500,5
+     Un punto seguido de exactamente 3 dígitos (y sin 0 adelante) se lee como separador de miles,
+     como se escribe en Argentina: "1.500" son mil quinientas hectáreas, no 1,5. */
   function leerHectareas(texto) {
     const limpio = String(texto).trim();
-    if (!/^\d+(?:[.,]\d+)?$/.test(limpio)) return null;   // solo números, con coma o punto
-    const n = Number(limpio.replace(",", "."));
-    return n > 0 ? n : null;
+    let normal;
+    if (/^[1-9]\d{0,2}(\.\d{3})+(,\d+)?$/.test(limpio)) {
+      normal = limpio.replace(/\./g, "").replace(",", ".");
+    } else if (/^\d+(?:[.,]\d+)?$/.test(limpio)) {
+      normal = limpio.replace(",", ".");
+    } else {
+      return null;
+    }
+    const n = Number(normal);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+
+  function maximoHectareas() {
+    const m = config && Number(config.maximo_hectareas);
+    return Number.isFinite(m) && m > 0 ? m : MAXIMO_HECTAREAS_POR_DEFECTO;
+  }
+
+  function limpiarErrorCampo(campo) {
+    const input = $("calc-" + campo);
+    const error = $("error-" + campo);
+    if (error) {
+      error.hidden = true;
+      error.textContent = "";
+    }
+    if (input) input.removeAttribute("aria-invalid");
   }
 
   function mostrarError(campo, mensaje) {
@@ -77,13 +138,24 @@
   }
 
   function limpiarErrores() {
-    ["nombre", "localidad", "hectareas", "tipo"].forEach((campo) => {
-      const input = $("calc-" + campo);
-      const error = $("error-" + campo);
-      if (error) { error.hidden = true; error.textContent = ""; }
-      if (input) input.removeAttribute("aria-invalid");
-    });
-    $("calc-aviso").hidden = true;
+    ["nombre", "localidad", "hectareas", "tipo"].forEach(limpiarErrorCampo);
+    const aviso = $("calc-aviso");
+    if (aviso) {
+      aviso.hidden = true;
+      aviso.textContent = "";
+    }
+  }
+
+  function alEditarCampo(evento) {
+    const camposPorId = {
+      "calc-nombre": "nombre",
+      "calc-localidad": "localidad",
+      "calc-hectareas": "hectareas",
+      "calc-tipo": "tipo"
+    };
+    const campo = camposPorId[evento.target && evento.target.id];
+    if (campo) limpiarErrorCampo(campo);
+    reiniciarResultado();
   }
 
   function reiniciarResultado() {
@@ -136,7 +208,11 @@
     const errores = [];
     if (nombre.length < 2) errores.push(["nombre", "Contanos tu nombre (mínimo 2 letras)."]);
     if (indice === "") errores.push(["localidad", "Elegí tu localidad de la lista."]);
-    if (hectareas === null) errores.push(["hectareas", "Poné las hectáreas con un número mayor a 0 (por ejemplo 120 o 85,5)."]);
+    if (hectareas === null) {
+      errores.push(["hectareas", "Poné las hectáreas con un número mayor a 0 (por ejemplo 120, 1.500 u 85,5)."]);
+    } else if (hectareas > maximoHectareas()) {
+      errores.push(["hectareas", "Para más de " + numero(maximoHectareas()) + " ha escribinos directo por WhatsApp y lo vemos juntos."]);
+    }
     if (tipoId === "") errores.push(["tipo", "Elegí el tipo de aplicación."]);
 
     if (errores.length > 0) {
@@ -146,36 +222,51 @@
       return;
     }
 
-    presupuestoActual = Object.assign(
-      { nombre },
-      calcularPresupuesto(config, { indiceLocalidad: Number(indice), hectareas, tipoId })
-    );
-    mostrarResultado(presupuestoActual);
+    try {
+      presupuestoActual = Object.assign(
+        { nombre },
+        calcularPresupuesto(config, { indiceLocalidad: Number(indice), hectareas, tipoId })
+      );
+      mostrarResultado(presupuestoActual);
+    } catch (error) {
+      console.error("No se pudo calcular el presupuesto:", error);
+      reiniciarResultado();
+      const aviso = $("calc-aviso");
+      aviso.textContent = error.message || "No se pudo calcular el presupuesto. Revisá los datos e intentá nuevamente.";
+      aviso.hidden = false;
+    }
   }
 
   /* ---------- WhatsApp ---------- */
   function enviarPorWhatsApp() {
     if (!presupuestoActual) return;
 
-    const numeroWsp = String(config.whatsapp || "").replace(/\D/g, "");
-    if (numeroWsp.length < 10) {
+    const numeroWsp = normalizarWhatsapp(config.whatsapp);
+    if (!numeroWsp) {
       const aviso = $("calc-aviso");
-      aviso.textContent = "El número de WhatsApp del config.json no es válido. Revisalo (formato 549 + código de área + número).";
+      aviso.textContent = "El número de WhatsApp de config.json no parece válido. Usá el formato internacional, con código de país y área (por ejemplo: 549XXXXXXXXXX).";
       aviso.hidden = false;
       return;
     }
 
     const p = presupuestoActual;
+    const responsable = String((config.negocio && config.negocio.responsable) || "equipo GS Agroquímicos").trim();
     const mensaje = [
-      "Hola Guido, ¿cómo andás? Soy " + p.nombre + ".",
-      "Te paso los datos para un presupuesto de aplicación con dron:",
+      "Hola " + responsable + ", ¿cómo andás? Soy " + p.nombre + ".",
+      "Quería consultar por una aplicación con dron. Te paso los datos:",
       "",
+      "DATOS DEL TRABAJO",
       "• Localidad: " + p.localidad.nombre,
-      "• Hectáreas: " + numero(p.hectareas),
+      "• Superficie: " + numero(p.hectareas) + " ha",
       "• Tipo de aplicación: " + p.tipo.nombre,
-      "• Total estimado: " + dinero(p.total),
       "",
-      "Ojo: es un presupuesto estimativo, hecho con la calculadora de la web. ¿Lo confirmamos?"
+      "PRESUPUESTO ESTIMADO",
+      "• Precio por hectárea: " + dinero(p.precioHa),
+      "• Aplicación: " + dinero(p.base),
+      ...(p.aplicaRecargo ? ["• Traslado: " + dinero(p.recargo)] : []),
+      "• TOTAL: " + dinero(p.total),
+      "",
+      "¿Podemos confirmar el presupuesto y coordinar?"
     ].join("\n");
 
     const url = "https://wa.me/" + numeroWsp + "?text=" + encodeURIComponent(mensaje);
@@ -223,9 +314,9 @@
 
     const form = $("calc-form");
     form.addEventListener("submit", alEnviar);
-    // Si cambia cualquier dato, el resultado viejo se esconde (así no se manda un total desactualizado)
-    form.addEventListener("input", reiniciarResultado);
-    form.addEventListener("change", reiniciarResultado);
+    // Al editar, se limpia el error de ese campo y se oculta cualquier resultado anterior.
+    form.addEventListener("input", alEditarCampo);
+    form.addEventListener("change", alEditarCampo);
 
     $("calc-whatsapp").addEventListener("click", enviarPorWhatsApp);
   }
@@ -266,10 +357,13 @@
       cfg.limite_distancia_km + " km, se suma un recargo de traslado de " + dinero(cfg.recargo_traslado) +
       ". Desde " + cfg.limite_hectareas + " ha no se cobra traslado, quede donde quede.";
 
+    // Si el número de WhatsApp no sirve, no mostramos un botón que no puede funcionar
+    $("calc-whatsapp").hidden = !normalizarWhatsapp(cfg.whatsapp);
+
     $("calc-sin-config").hidden = true;
     $("calc-form").hidden = false;
   }
 
   enlazarEventos();
-  window.Calculadora = { iniciar, calcularPresupuesto };
+  window.Calculadora = { iniciar, calcularPresupuesto, normalizarWhatsapp, leerHectareas };
 })();
