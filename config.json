@@ -1,0 +1,110 @@
+{
+  "_nota": "Valores de EJEMPLO. Editá lo que quieras (cuidado con las comas y las comillas). Los números van sin comillas y sin puntos de miles.",
+
+  "negocio": {
+    "nombre": "GS Aplicación de agroquímicos",
+    "banner": "GS aplicacion de agroquimicos - demo",
+    "responsable": "Guido"
+  },
+
+  "whatsapp": "5493510000000",
+
+  "moneda": { "codigo": "ARS", "locale": "es-AR" },
+
+  "tipos_aplicacion": [
+    { "id": "herbicida",    "nombre": "Herbicida",           "precio_por_hectarea": 4500 },
+    { "id": "fungicida",    "nombre": "Fungicida",           "precio_por_hectarea": 5200 },
+    { "id": "insecticida",  "nombre": "Insecticida",         "precio_por_hectarea": 5000 },
+    { "id": "foliar",       "nombre": "Fertilizante foliar", "precio_por_hectarea": 4800 }
+  ],
+
+  "limite_hectareas": 100,
+  "limite_distancia_km": 100,
+  "recargo_traslado": 60000,
+
+  "localidades": [
+    { "nombre": "Alta Gracia",      "distancia_km": 40 },
+    { "nombre": "Almafuerte",       "distancia_km": 90 },
+    { "nombre": "Bell Ville",       "distancia_km": 190 },
+    { "nombre": "Córdoba",          "distancia_km": 35 },
+    { "nombre": "Jesús María",      "distancia_km": 55 },
+    { "nombre": "Laboulaye",        "distancia_km": 330 },
+    { "nombre": "Río Cuarto",       "distancia_km": 215 },
+    { "nombre": "Río Tercero",      "distancia_km": 100 },
+    { "nombre": "San Francisco",    "distancia_km": 210 },
+    { "nombre": "Villa María",      "distancia_km": 150 }
+  ],
+
+  "hero": {
+    "etiqueta": "Aplicación con dron · Córdoba, Argentina",
+    "titulo": "Tu campo bien cuidado, desde el aire",
+    "frase": "Aplicamos con dron justo donde hace falta, sin pisar el cultivo y sin perder producto. Sacá la cuenta en un toque.",
+    "boton": "Pedí tu presupuesto"
+  },
+
+  "por_que": {
+    "titulo": "¿Por qué aplicar con dron?",
+    "subtitulo": "Mirá todo lo que ganás cuando el trabajo va por aire.",
+    "tarjetas": [
+      {
+        "icono": "🌱",
+        "titulo": "No pisa el cultivo",
+        "texto": "El dron vuela por arriba: cero huellas y cero plantas aplastadas. Tu cultivo queda como lo dejaste."
+      },
+      {
+        "icono": "🎯",
+        "titulo": "Precisión",
+        "texto": "Va por una ruta cargada con GPS y aplica justo donde hace falta. Nada de andar a ojo."
+      },
+      {
+        "icono": "💧",
+        "titulo": "Menos producto desperdiciado",
+        "texto": "Gota fina y bien dirigida: usás menos producto y la plata te rinde más."
+      },
+      {
+        "icono": "🌧️",
+        "titulo": "Entra a lotes anegados",
+        "texto": "¿Llovió y la máquina no entra ni a palos? El dron pasa igual, no se empantana."
+      }
+    ]
+  },
+
+  "pasos": {
+    "titulo": "Cómo trabajamos",
+    "subtitulo": "Cuatro pasos y listo, sin vueltas.",
+    "items": [
+      { "titulo": "Consulta",    "texto": "Nos contás qué lote tenés, qué cultivo y qué querés aplicar. Charlamos por WhatsApp, sin compromiso." },
+      { "titulo": "Presupuesto", "texto": "Te pasamos el precio por hectárea y el total. Podés calcularlo vos mismo acá arriba, al toque." },
+      { "titulo": "Aplicación",  "texto": "Coordinamos el día, vamos con el dron y aplicamos cuando el clima y el viento acompañan." },
+      { "titulo": "Resultado",   "texto": "Te dejamos el lote trabajado y te pasamos el detalle de lo que se hizo. Cualquier duda, nos escribís." }
+    ]
+  },
+
+  "galeria": {
+    "titulo": "Así trabajamos",
+    "subtitulo": "Algunas fotos del dron en acción.",
+    "fotos": [
+      { "src": "img/dron1.jpg", "alt": "Dron aplicando producto sobre un lote de soja" },
+      { "src": "img/dron2.jpg", "alt": "Dron volando a baja altura sobre un cultivo" },
+      { "src": "img/dron3.jpg", "alt": "Preparación del dron antes de una aplicación" }
+    ]
+  },
+
+  "calculadora": {
+    "titulo": "Calculá cuánto te sale",
+    "texto": "Elegí tu localidad, las hectáreas y el tipo de aplicación, y mirá el presupuesto estimado al instante. Después se lo mandás a Guido por WhatsApp.",
+    "boton": "Calcular presupuesto"
+  },
+
+  "contacto": {
+    "titulo": "Hablemos",
+    "texto": "¿Tenés dudas o querés coordinar una fecha? Escribile directo a Guido, te contesta en cuanto puede.",
+    "boton": "Escribile a Guido por WhatsApp",
+    "mensaje_directo": "Hola Guido, ¿cómo andás? Quería hacerte una consulta por una aplicación con dron.",
+    "zona": "Trabajamos en toda la provincia de Córdoba."
+  },
+
+  "footer": {
+    "texto": "© {anio} GS Aplicación de agroquímicos · Córdoba, Argentina · Página demo"
+  }
+}
