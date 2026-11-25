@@ -5,6 +5,7 @@
    - Animaciones al scrollear (respaldo con IntersectionObserver)
    - Línea de tiempo que se rellena
    - Galería con flechas
+   - Dron que se achica al scrollear
    ========================================================== */
 (function () {
   "use strict";
@@ -361,6 +362,7 @@
     window.addEventListener("resize", actualizar);
     actualizar();
   }
+
   /* ---------- 8. Dron: grande al principio, se achica al scrollear ---------- */
   function iniciarDron() {
     const dron = $("dron");
@@ -403,10 +405,12 @@
     window.addEventListener("resize", pedirCalculo);
     calcular();
   }
+
   /* ---------- Arranque ---------- */
   async function iniciar() {
     iniciarMenu();
     iniciarVideo();
+    iniciarDron();
 
     try {
       const config = await cargarConfig();
