@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GS Aplicación de agroquímicos con dron · Córdoba</title>
+  <meta name="description" content="Aplicación de agroquímicos con dron en campos de Córdoba. Calculá tu presupuesto por hectárea en un toque.">
+  <meta name="theme-color" content="#17512c">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+
+  <!-- 1. BANNER FIJO + BARRA DE NAVEGACIÓN (siempre arriba) -->
+  <header class="sitio-header">
+    <div class="banner-demo" role="note">
+      <span id="texto-banner">GS aplicacion de agroquimicos - demo</span>
+    </div>
+
+    <nav class="navbar" aria-label="Principal">
+      <a class="navbar__marca" href="#inicio">
+        <span class="marca__logo" aria-hidden="true">GS</span>
+        <span class="marca__texto">Aplicación con dron</span>
+      </a>
+
+      <ul class="navbar__enlaces" id="menu-principal">
+        <li><a href="#por-que">Por qué con dron</a></li>
+        <li><a href="#como-trabajamos">Cómo trabajamos</a></li>
+        <li><a href="#galeria">Galería</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+
+      <div class="navbar__acciones">
+        <!-- Este botón queda SIEMPRE visible arriba y abre la calculadora -->
+        <button type="button" class="boton boton--primario boton--chico" data-abrir-calculadora>
+          Calcular presupuesto
+        </button>
+        <button type="button" class="navbar__burger" id="boton-menu"
+                aria-expanded="false" aria-controls="menu-principal" aria-label="Abrir menú">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Aviso que aparece si no se pudo cargar config.json -->
+  <div class="aviso-config" id="aviso-config" role="alert" hidden>
+    <strong>Uy, algo salió mal.</strong>
+    <span id="aviso-config-texto"></span>
+    <span>Si lo estás probando en tu compu, abrilo con un servidor local (por ejemplo la extensión Live Server de VS Code) y no con doble clic en index.html.</span>
+  </div>
+
+  <main id="contenido">
+
+    <!-- 2. HERO -->
+    <section class="hero" id="inicio" aria-labelledby="hero-titulo">
+      <video class="hero__video" autoplay muted loop playsinline preload="metadata"
+             poster="img/hero.jpg" aria-hidden="true" tabindex="-1">
+        <source src="video/dron.mp4" type="video/mp4">
+      </video>
+      <div class="hero__velo"></div>
+
+      <div class="contenedor hero__contenido">
+        <p class="hero__etiqueta" id="hero-etiqueta"></p>
+        <h1 id="hero-titulo"></h1>
+        <p class="hero__frase" id="hero-frase"></p>
+        <button type="button" class="boton boton--claro boton--grande" id="hero-boton" data-abrir-calculadora>
+          Pedí tu presupuesto
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. POR QUÉ APLICAR CON DRON -->
+    <section class="seccion" id="por-que" aria-labelledby="titulo-por-que">
+      <div class="contenedor encabezado revelar">
+        <h2 id="titulo-por-que"></h2>
+        <p id="subtitulo-por-que"></p>
+      </div>
+      <p class="pista-deslizar" aria-hidden="true">Deslizá para ver más →</p>
+      <div class="tarjetas deslizable" id="lista-tarjetas" role="region" aria-label="Ventajas de aplicar con dron"></div>
+    </section>
+
+    <!-- 4. CÓMO TRABAJAMOS (línea de tiempo horizontal) -->
+    <section class="seccion seccion--suave" id="como-trabajamos" aria-labelledby="titulo-pasos">
+      <div class="contenedor encabezado revelar">
+        <h2 id="titulo-pasos"></h2>
+        <p id="subtitulo-pasos"></p>
+      </div>
+      <p class="pista-deslizar" aria-hidden="true">Deslizá para ver los pasos →</p>
+      <ol class="pasos deslizable" id="lista-pasos"></ol>
+    </section>
+
+    <!-- 5. GALERÍA -->
+    <section class="seccion" id="galeria" aria-labelledby="titulo-galeria">
+      <div class="contenedor encabezado revelar">
+        <h2 id="titulo-galeria"></h2>
+        <p id="subtitulo-galeria"></p>
+      </div>
+      <div class="galeria-controles">
+        <button type="button" class="flecha" id="galeria-anterior" aria-label="Foto anterior">‹</button>
+        <button type="button" class="flecha" id="galeria-siguiente" aria-label="Foto siguiente">›</button>
+      </div>
+      <p class="pista-deslizar" aria-hidden="true">Deslizá para ver más fotos →</p>
+      <div class="galeria deslizable" id="galeria-pista" role="region" aria-label="Galería de fotos"></div>
+    </section>
+
+    <!-- 6. CALCULADORA (la calculadora en sí vive en la ventana flotante de abajo) -->
+    <section class="seccion seccion--oscura" id="calculadora" aria-labelledby="titulo-calculadora">
+      <div class="contenedor calculadora-cta revelar">
+        <h2 id="titulo-calculadora"></h2>
+        <p id="texto-calculadora"></p>
+        <button type="button" class="boton boton--claro boton--grande" id="boton-calculadora" data-abrir-calculadora>
+          Calcular presupuesto
+        </button>
+      </div>
+    </section>
+
+    <!-- 7. CONTACTO -->
+    <section class="seccion seccion--suave" id="contacto" aria-labelledby="titulo-contacto">
+      <div class="contenedor contacto revelar">
+        <h2 id="titulo-contacto"></h2>
+        <p id="texto-contacto"></p>
+        <a class="boton boton--whatsapp boton--grande" id="boton-whatsapp" target="_blank" rel="noopener">
+          <span aria-hidden="true">💬</span> Escribile a Guido por WhatsApp
+        </a>
+        <p class="contacto__zona" id="texto-zona"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor">
+      <a class="boton boton--whatsapp pie__boton" id="pie-whatsapp" target="_blank" rel="noopener">
+        <span aria-hidden="true">💬</span> WhatsApp directo con Guido
+      </a>
+      <p id="pie-texto"></p>
+    </div>
+  </footer>
+
+  <!-- VENTANA FLOTANTE DE LA CALCULADORA -->
+  <dialog class="dialogo" id="dialogo-calculadora" aria-labelledby="calc-titulo">
+    <div class="dialogo__cuerpo">
+      <div class="dialogo__cabecera">
+        <h2 id="calc-titulo">Calculá tu presupuesto</h2>
+        <button type="button" class="dialogo__cerrar" id="calc-cerrar" aria-label="Cerrar calculadora">×</button>
+      </div>
+      <p class="nota">Completá los datos y te armamos el precio al toque.</p>
+
+      <p class="aviso aviso--error" id="calc-sin-config">
+        No pudimos cargar los datos para calcular. Probá recargar la página.
+      </p>
+
+      <form id="calc-form" novalidate hidden>
+        <div class="campo">
+          <label for="calc-nombre">Tu nombre</label>
+          <input id="calc-nombre" name="nombre" type="text" autocomplete="name" maxlength="60"
+                 aria-describedby="error-nombre" required>
+          <p class="campo__error" id="error-nombre" hidden></p>
+        </div>
+
+        <div class="campo">
+          <label for="calc-localidad">Localidad</label>
+          <select id="calc-localidad" name="localidad" aria-describedby="error-localidad" required></select>
+          <p class="campo__error" id="error-localidad" hidden></p>
+        </div>
+
+        <div class="campo">
+          <label for="calc-hectareas">Hectáreas</label>
+          <input id="calc-hectareas" name="hectareas" type="text" inputmode="decimal" autocomplete="off"
+                 placeholder="Ej: 120 o 85,5" aria-describedby="ayuda-hectareas error-hectareas" required>
+          <p class="campo__ayuda" id="ayuda-hectareas">Podés usar coma o punto para los decimales.</p>
+          <p class="campo__error" id="error-hectareas" hidden></p>
+        </div>
+
+        <div class="campo">
+          <label for="calc-tipo">Tipo de aplicación</label>
+          <select id="calc-tipo" name="tipo" aria-describedby="error-tipo" required></select>
+          <p class="campo__error" id="error-tipo" hidden></p>
+        </div>
+
+        <button type="submit" class="boton boton--primario boton--grande boton--block">
+          Calcular
+        </button>
+      </form>
+
+      <p class="aviso aviso--error" id="calc-aviso" role="alert" hidden></p>
+
+      <div aria-live="polite">
+        <div class="resultado" id="calc-resultado" hidden>
+          <h3>Tu presupuesto estimado</h3>
+          <dl class="desglose">
+            <div class="desglose__fila">
+              <dt>
+                <span id="res-base-etiqueta">Aplicación</span>
+                <span class="desglose__detalle" id="res-base-detalle"></span>
+              </dt>
+              <dd id="res-base"></dd>
+            </div>
+            <div class="desglose__fila" id="fila-recargo" hidden>
+              <dt>Recargo por traslado</dt>
+              <dd id="res-recargo"></dd>
+            </div>
+            <div class="desglose__fila desglose__total">
+              <dt>Total estimado</dt>
+              <dd id="res-total"></dd>
+            </div>
+          </dl>
+          <p class="nota" id="res-aclaracion"></p>
+          <p class="nota">Es un presupuesto estimativo: el precio final lo confirma Guido.</p>
+          <button type="button" class="boton boton--whatsapp boton--grande boton--block" id="calc-whatsapp">
+            <span aria-hidden="true">💬</span> Enviar a Guido por WhatsApp
+          </button>
+        </div>
+      </div>
+
+      <p class="nota" id="calc-nota"></p>
+    </div>
+  </dialog>
+
+  <!-- Primero la calculadora, después el main (main.js la usa) -->
+  <script src="js/calculadora.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
