@@ -3,11 +3,11 @@
 
   "negocio": {
     "nombre": "GS Aplicación de agroquímicos",
-    "banner": "GS aplicacion de agroquimicos - demo",
+    "banner": "GS Aplicación de agroquímicos · demo",
     "responsable": "Guido"
   },
 
-  "whatsapp": "5493510000000",
+  "whatsapp": "5493547677472",
 
   "moneda": { "codigo": "ARS", "locale": "es-AR" },
 
@@ -21,6 +21,7 @@
   "limite_hectareas": 100,
   "limite_distancia_km": 100,
   "recargo_traslado": 60000,
+  "maximo_hectareas": 100000,
 
   "localidades": [
     { "nombre": "Alta Gracia",      "distancia_km": 40 },
@@ -83,6 +84,7 @@
   "galeria": {
     "titulo": "Así trabajamos",
     "subtitulo": "Algunas fotos del dron en acción.",
+    "mostrar": false,
     "fotos": [
       { "src": "img/dron1.jpg", "alt": "Dron aplicando producto sobre un lote de soja" },
       { "src": "img/dron2.jpg", "alt": "Dron volando a baja altura sobre un cultivo" },
