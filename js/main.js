@@ -361,7 +361,48 @@
     window.addEventListener("resize", actualizar);
     actualizar();
   }
+  /* ---------- 8. Dron: grande al principio, se achica al scrollear ---------- */
+  function iniciarDron() {
+    const dron = $("dron");
+    if (!dron) return;
+    const img = dron.querySelector(".dron__img");
 
+    // Si la foto no está, escondemos todo el dron (sin ícono roto)
+    img.addEventListener("error", () => { dron.hidden = true; });
+    if (img.complete && img.naturalWidth === 0) dron.hidden = true;
+
+    // Gotitas: 12 por pico, cada una con tiempos y desvío al azar
+    dron.querySelectorAll(".pico").forEach((pico) => {
+      for (let i = 0; i < 12; i++) {
+        const gota = crear("span", "gota");
+        const duracion = 0.7 + Math.random() * 0.5;
+        gota.style.setProperty("--t", duracion.toFixed(2) + "s");
+        gota.style.setProperty("--d", "-" + (Math.random() * duracion).toFixed(2) + "s");
+        gota.style.setProperty("--dx", (Math.random() * 2 - 1).toFixed(2));
+        gota.style.setProperty("--escala", (0.7 + Math.random() * 0.6).toFixed(2));
+        pico.append(gota);
+      }
+    });
+
+    // Sin animaciones: queda chiquito y estacionado, sin seguir el scroll
+    if (sinMovimiento()) { dron.style.setProperty("--p", "1"); return; }
+
+    let pendiente = false;
+    function calcular() {
+      pendiente = false;
+      // Se achica durante el primer 85% de la altura de la pantalla
+      const t = Math.min(1, Math.max(0, window.scrollY / (window.innerHeight * 0.85)));
+      const p = t * t * (3 - 2 * t);   // arranque y frenada suaves
+      dron.style.setProperty("--p", p.toFixed(3));
+    }
+    function pedirCalculo() {
+      if (!pendiente) { pendiente = true; requestAnimationFrame(calcular); }
+    }
+
+    window.addEventListener("scroll", pedirCalculo, { passive: true });
+    window.addEventListener("resize", pedirCalculo);
+    calcular();
+  }
   /* ---------- Arranque ---------- */
   async function iniciar() {
     iniciarMenu();
