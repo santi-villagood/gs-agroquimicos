@@ -138,11 +138,9 @@
     if (numeroWsp) {
       const url = linkWhatsapp(numeroWsp, co.mensaje_directo || "Hola, quería hacer una consulta.");
       $("boton-whatsapp").href = url;
-      $("pie-whatsapp").href = url;
     } else {
       console.warn("config.json: el número de WhatsApp no es válido (formato 549 + área + número, sin espacios). Se esconden los botones de WhatsApp.");
       $("boton-whatsapp").hidden = true;
-      $("pie-whatsapp").hidden = true;
     }
     if (co.boton) {
       $("boton-whatsapp").lastChild.textContent = " " + co.boton;
