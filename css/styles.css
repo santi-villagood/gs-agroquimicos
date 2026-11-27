@@ -232,6 +232,16 @@ p { margin: 0 0 1em; }
   }
 }
 
+/* En celu las tarjetas van una arriba de la otra (sin deslizar de costado) */
+@media (max-width: 899px) {
+  .tarjetas.deslizable {
+    flex-direction: column; gap: 1rem;
+    overflow: visible; scroll-snap-type: none; scroll-padding-inline: 0;
+    width: min(30rem, calc(100% - 2rem)); margin-inline: auto; padding: 0.5rem 0 1rem;
+  }
+  .tarjetas.deslizable > * { flex: none; }
+}
+
 /* ---------- Línea de tiempo horizontal ---------- */
 .pasos { --marca: 56px; --pad-sup: 0.5rem; list-style: none; margin: 0; position: relative; }
 .pasos.deslizable { --ancho-item: min(78vw, 320px); gap: 0; padding-top: var(--pad-sup); }
@@ -406,6 +416,13 @@ p { margin: 0 0 1em; }
         animation-timeline: view(inline);
       }
     }
+    @media (max-width: 899px) {
+      .tarjetas.deslizable > * {
+        animation: neblina linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 75%;
+      }
+    }
   }
 
   /* B) Respaldo para navegadores sin eso (Firefox, Safari viejo): IntersectionObserver */
@@ -423,6 +440,13 @@ p { margin: 0 0 1em; }
         transition-delay: calc(var(--i, 0) * 120ms);
       }
       .con-js .revelar-pc.visible { opacity: 1; filter: none; transform: none; }
+    }
+    @media (max-width: 899px) {
+      .con-js .tarjetas .revelar-pc {
+        opacity: 0; filter: blur(10px); transform: translateY(32px) scale(0.96);
+        transition: opacity 0.8s var(--curva), transform 0.8s var(--curva), filter 0.8s var(--curva);
+      }
+      .con-js .tarjetas .revelar-pc.visible { opacity: 1; filter: none; transform: none; }
     }
   }
 }
