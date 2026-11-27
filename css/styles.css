@@ -35,7 +35,7 @@ html.sin-scroll { overflow: hidden; }   /* cuando la calculadora está abierta *
 
 body {
   margin: 0;
-  font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: "DM Sans", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 1.0625rem;
   line-height: 1.6;
   color: var(--texto);
@@ -46,7 +46,10 @@ body {
 img, video { max-width: 100%; display: block; }
 [hidden] { display: none !important; }
 
-h1, h2, h3 { line-height: 1.15; margin: 0 0 0.6em; color: var(--verde-950); }
+h1, h2, h3 {
+  font-family: "Plus Jakarta Sans", "DM Sans", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.15; margin: 0 0 0.6em; color: var(--verde-950);
+}
 p { margin: 0 0 1em; }
 
 :focus-visible { outline: 3px solid var(--verde-600); outline-offset: 3px; }
