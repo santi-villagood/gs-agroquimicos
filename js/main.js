@@ -296,26 +296,56 @@
     if (!pista) return;
     const pasos = Array.from(pista.querySelectorAll(".paso"));
     if (pasos.length === 0) return;
+    const enColumna = window.matchMedia("(max-width: 899px)");   // celu: pasos uno arriba del otro
 
-    function pintar(p) {
+    function pintar(p, estaActivo) {
       pista.style.setProperty("--progreso", p.toFixed(3));
-      pasos.forEach((paso, i) => {
-        const umbral = pasos.length > 1 ? i / (pasos.length - 1) : 0;
-        paso.classList.toggle("activo", p >= umbral - 0.001);
+      pasos.forEach((paso, i) => paso.classList.toggle("activo", estaActivo(i)));
+    }
+
+    // Altura (en pantalla) del centro de cada circulito. Solo se usa en celu.
+    function centros() {
+      return pasos.map((paso) => {
+        const r = paso.querySelector(".paso__marca").getBoundingClientRect();
+        return r.top + r.height / 2;
       });
+    }
+    function medirLargo(c) {
+      pista.style.setProperty("--largo", (c[c.length - 1] - c[0]) + "px");
     }
 
     // Sin animaciones: mostramos todo ya completo
-    if (sinMovimiento()) { pintar(1); return; }
+    if (sinMovimiento()) {
+      const completo = () => {
+        if (enColumna.matches) medirLargo(centros());
+        pintar(1, () => true);
+      };
+      window.addEventListener("resize", completo);
+      completo();
+      return;
+    }
 
     let pendiente = false;
     function calcular() {
       pendiente = false;
-      const arriba = pista.getBoundingClientRect().top;
       const alto = window.innerHeight;
-      // Empieza cuando la línea sube al 80% de la pantalla y termina al 40%
-      const p = (alto * 0.8 - arriba) / (alto * 0.4);
-      pintar(Math.min(1, Math.max(0, p)));
+      if (enColumna.matches) {
+        // Celu: la línea se rellena hasta una "guía" que está al 70% de la pantalla
+        const c = centros();
+        medirLargo(c);
+        const largo = c[c.length - 1] - c[0];
+        const guia = alto * 0.7;
+        const p = largo > 0 ? (guia - c[0]) / largo : (guia >= c[0] ? 1 : 0);
+        pintar(Math.min(1, Math.max(0, p)), (i) => guia >= c[i] - 1);
+      } else {
+        // PC: empieza cuando la línea sube al 80% de la pantalla y termina al 40%
+        const arriba = pista.getBoundingClientRect().top;
+        const p = Math.min(1, Math.max(0, (alto * 0.8 - arriba) / (alto * 0.4)));
+        pintar(p, (i) => {
+          const umbral = pasos.length > 1 ? i / (pasos.length - 1) : 0;
+          return p >= umbral - 0.001;
+        });
+      }
     }
     function pedirCalculo() {
       if (!pendiente) { pendiente = true; requestAnimationFrame(calcular); }
@@ -323,6 +353,7 @@
 
     window.addEventListener("scroll", pedirCalculo, { passive: true });
     window.addEventListener("resize", pedirCalculo);
+    window.addEventListener("load", pedirCalculo);
     calcular();
   }
 
